@@ -42,6 +42,9 @@ RR = IR + 4
 
 IR = CONSTANT
 
+### `NOP`
+No Operation
+
 ## Memory Access
 
 ### `READ Va, [Vb]`
