@@ -1,5 +1,7 @@
 # Instructions
 
+Instructions are the foundation of any program, and are what the CPU reads and executes. To adhere to RISC (Reduced Instruction Set Computer) standards, the instructions have been kept as simple as possible.
+
 ## Register Transfer
 
 ### `MOVE Va, Vb`
