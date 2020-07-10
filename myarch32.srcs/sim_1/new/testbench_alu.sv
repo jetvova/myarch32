@@ -1,5 +1,5 @@
 `timescale 10ns / 1ps
-module testbench;
+module testbench_alu;
     
 reg [31:0] arg1 = 1;
 reg [31:0] arg2 = 5;
