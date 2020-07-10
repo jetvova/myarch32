@@ -7,19 +7,18 @@ reg [31:0] writeData1;
 reg [31:0] writeData2;
 reg write1;
 reg write2;
-reg clock;
-reg reset;
+reg clock = 0;
+reg reset = 0;
 wire [31:0] read [15:0];
     
 registers uut (writeAddress1, writeAddress2, writeData1, writeData2, write1, write2, clock, reset, read);
 
+always #1 clock = ~clock;
     
 initial 
 begin 
-    reset = 0;
-
+    #1
     $display("Testing Write");
-    clock = 0;
     writeAddress1 = 0;
     writeData1 = 420;
     write1 = 1;
@@ -27,21 +26,21 @@ begin
     writeAddress2 = 1;
     writeData2 = 69;
     write2 = 1;
-
-    #1 clock = 1;
-    #1 clock = 0;
-    #1 assert (read[0] == 420) else $error("read[0] = %d", read[0]);
-    #1 assert (read[1] == 69) else $error("read[1] = %d", read[1]);
+    
+    #2
+    write1 = 0;
+    write2 = 0;
+    
+    
+    assert (read[0] == 420) else $error("read[0] = %d", read[0]);
+    assert (read[1] == 69) else $error("read[1] = %d", read[1]);
         
 
     $display("Testing Reset");
-    clock = 0;
     reset = 1;
-    #1 clock = 1;
-    #1 clock = 0;
-    #1 reset = 0;
+    #2
+    reset = 0;
 
-    #1 
     for (int i = 0; i < 16; i++) 
     begin
         assert (read[i] == 0) else $error("read[%d] = %d", i, read[i]);
