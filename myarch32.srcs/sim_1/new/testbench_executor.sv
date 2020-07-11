@@ -32,11 +32,36 @@ executor uut (
 
 always #1 clock = ~clock;
 
-
 wire [31:0] V2 = registers.read[2]; 
 wire [31:0] V3 = registers.read[3]; 
 wire [31:0] V5 = registers.read[5]; 
 
+task writeRegister(input [3:0] target, input [31:0] value);
+    writeAddress1 = target;
+    writeAddress2 = 0;
+    writeData1 = value;
+    writeData2 = 0;
+    write1 = 1;
+    write2 = 0;
+    #2
+    writeAddress1 = 0;
+    writeAddress2 = 0;
+    writeData1 = 0;
+    writeData2 = 0;
+    write1 = 0;
+    write2 = 0;
+    assert (registers.read[target] == value)
+        else $error("Failed to write value= %d to V%d , current value= %d", value, target, registers.read[target]);
+endtask
+
+task runInstruction(input [31:0] code, input string text);
+    $display("Executing 0x%x   %s", code, text);
+    instruction = code;
+    execEnabled = 1; 
+    #2
+    execEnabled = 0;
+
+endtask
 
 initial 
 begin 
@@ -47,40 +72,18 @@ begin
     #2 
     reset = 0;
     #2
-    writeAddress1 = 3;
-    writeAddress2 = 5;
-    writeData1 = 100;
-    writeData2 = 25;
-    write1 = 1;
-    write2 = 1;
-    #2
-    writeAddress1 = 0;
-    writeAddress2 = 0;
-    writeData1 = 0;
-    writeData2 = 0;
-    write1 = 0;
-    write2 = 0;
-    
-    $display("Testing add");
-    
-    instruction = 'h01023500; // ADD V2, V3, V5
-    execEnabled = 1; 
-    #2
-    instruction = 0;
-    execEnabled = 0;
 
-    assert (registers.read[2] == 125) else $error("registers.read[2] = %d", registers.read[2]);
+    $display("Testing add");
+    writeRegister(3, 100);
+    writeRegister(5, 25);
+    runInstruction('h01023500, "ADD V2, V3, V5");
+    assert (V2 == 125) else $error("V2 = %d", V2);
     
     $display("Testing consuming add");
-    
-    instruction = 'h01033500; // ADD V3, V3, V5
-    execEnabled = 1; 
-    #2
-    instruction = 0;
-    execEnabled = 0;
-
-    assert (registers.read[3] == 125) else $error("registers.read[3] = %d", registers.read[3]);
-
+    writeRegister(3, 100);
+    writeRegister(5, 25);
+    runInstruction('h01033500, "ADD V3, V3, V5");
+    assert (V3 == 125) else $error("V3 = %d", V3);
 
     #5 $finish;
 end
