@@ -1,31 +1,52 @@
 
 module top(
-    input [3:0] idx,
-    output [31:0] value);
-    
-wire[31:0] arg1 = 9;
-wire[31:0] arg2 = 1;
-wire[3:0] operation = 3;
-wire[63:0] result;
+    input execEnabled,
+    input [3:0] _writeAddress1,
+    input [3:0] _writeAddress2,
+    input [31:0] _writeData1,
+    input [31:0] _writeData2,
+    input _write1,
+    input _write2
 
-alu alu1 (
-  arg1, arg2, operation, result
 );
 
+
+    
 wire [3:0] writeAddress1;
 wire [3:0] writeAddress2;
 wire [31:0] writeData1;
 wire [31:0] writeData2;
 wire write1;
 wire write2;
-wire clock;
-wire reset;
-wire [31:0] read [15:0];
+reg clock = 0;
+reg reset = 0;
+wire [31:0] readValues [15:0];
 
-registers registers1 (writeAddress1, writeAddress2, writeData1, writeData2, write1, write2, clock, reset, read);
+reg [31:0] instruction;
 
-assign value = read[idx];
 
-//$display(result);
+registers registers1 (
+    .writeAddress1 (execEnabled ? writeAddress1 : _writeAddress1),
+    .writeAddress2 (execEnabled ? writeAddress2 : _writeAddress2),
+    .writeData1 (execEnabled ? writeData1 : _writeData1),
+    .writeData2 (execEnabled ? writeData2 : _writeData2),
+    .write1 (execEnabled ? write1 : _write1),
+    .write2 (execEnabled ? write2 : _write2),
+    .clock (clock),
+    .reset (reset),
+    .read (readValues)
+);
+
+executor uut (
+    .instruction (instruction),
+    .readValues (readValues),
+    .writeAddress1 (writeAddress1),
+    .writeAddress2 (writeAddress2),
+    .writeData1 (writeData1),
+    .writeData2 (writeData2),
+    .write1 (write1),
+    .write2 (write2)
+);
+
 
 endmodule

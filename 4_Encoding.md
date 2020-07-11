@@ -13,9 +13,10 @@ Each CPU instruction is exactly 32 bits (4 bytes) long, and all values are in Bi
 ```
 | Instruction                | Hex Code     | Binary Code                               | 
 |----------------------------|--------------|-------------------------------------------|
+|                            |              |   28   24    20    16   12    8    4    0 |
 | ADD(?) Vx, Vy, Vz          | 0x01(?)xyz00 | 0000 0001 (???0) xxxx yyyy zzzz 0000 0000 |
 | SUBTRACT(?) Vx, Vy, Vz     | 0x02(?)xyz00 | 0000 0010 (???0) xxxx yyyy zzzz 0000 0000 |
-| MULTIPLY(?) Vx, Vy, Vz, Vw | 0x03(?)xyzw0 | 0000 0011 (???0) xxxx yyyy zzzz wwww 0000 |
+| MULTIPLY(?) Vu, Vx, Vy, Vz | 0x03(?)xyzu0 | 0000 0011 (???0) xxxx yyyy zzzz uuuu 0000 |
 | DIVIDE(?) Vx, Vy, Vz       | 0x04(?)xyz00 | 0000 0100 (???0) xxxx yyyy zzzz 0000 0000 |
 | COMPARE(?) Vx, Vy          | 0x05(?)xy000 | 0000 0101 (???0) xxxx yyyy 0000 0000 0000 |
 | COMPARE(?) Vx, #           | 0x06(?)x#### | 0000 0110 (???0) xxxx #### #### #### #### |
