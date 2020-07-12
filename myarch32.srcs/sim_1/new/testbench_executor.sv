@@ -25,6 +25,15 @@ registers registers (
     .reset (reset)
 );
 
+// Debugging wires for simulation:
+
+// wire [3:0] registers_writeAddress1 = registers.writeAddress1;
+// wire [31:0] registers_writeData1 = registers.writeData1;
+// wire registers_write1 = registers.write1;
+// wire [31:0] mover_result = uut.mover.result;
+// wire [15:0] mover_args = uut.mover.args;
+// wire [3:0] mover_operation = uut.mover.operation;
+
 executor uut (
     .instruction (instruction),
     .readValues (registers.read)
@@ -105,6 +114,27 @@ begin
     writeRegister(5, 'h1000000);
     runInstruction('h03034530, "MULTIPLY V3, V3, V4, V5");
     assert (V3 == 'hcd000000) else $error("V3 = 0x%x", V3);
+
+    $display("Testing move");
+    writeRegister(3, 2);
+    writeRegister(4, 100);
+    runInstruction('h10034000, "MOVE V3, V4");
+    assert (V3 == 100) else $error("V3 = %d", V3);
+
+    $display("Testing pointless move");
+    writeRegister(3, 100);
+    runInstruction('h10033000, "MOVE V3, V3");
+    assert (V3 == 100) else $error("V3 = %d", V3);
+
+    $display("Testing immediate move");
+    writeRegister(3, 2);
+    runInstruction('h1103abcd, "MOVE V3, 0xabcd");
+    assert (V3 == 'habcd) else $error("V3 = 0x%x", V3);
+
+    $display("Testing big immediate move");
+    writeRegister(3, 'h1234);
+    runInstruction('h1203abcd, "BIGMOVE V3, 0xabcd");
+    assert (V3 == 'habcd1234) else $error("V3 = 0x%x", V3);
 
     #5 $finish;
 
