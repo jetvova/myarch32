@@ -34,6 +34,7 @@ always #1 clock = ~clock;
 
 wire [31:0] V2 = registers.read[2]; 
 wire [31:0] V3 = registers.read[3]; 
+wire [31:0] V4 = registers.read[4]; 
 wire [31:0] V5 = registers.read[5]; 
 
 task writeRegister(input [3:0] target, input [31:0] value);
@@ -74,19 +75,39 @@ begin
     #2
 
     $display("Testing add");
-    writeRegister(3, 100);
+    writeRegister(4, 100);
     writeRegister(5, 25);
-    runInstruction('h01023500, "ADD V2, V3, V5");
-    assert (V2 == 125) else $error("V2 = %d", V2);
+    runInstruction('h01034500, "ADD V3, V4, V5");
+    assert (V3 == 125) else $error("V3 = %d", V3);
     
     $display("Testing consuming add");
-    writeRegister(3, 100);
+    writeRegister(4, 100);
     writeRegister(5, 25);
-    runInstruction('h01033500, "ADD V3, V3, V5");
-    assert (V3 == 125) else $error("V3 = %d", V3);
+    runInstruction('h01044500, "ADD V4, V4, V5");
+    assert (V4 == 125) else $error("V4 = %d", V4);
+
+    $display("Testing multiply");
+    writeRegister(4, 100);
+    writeRegister(5, 5);
+    runInstruction('h03034520, "MULTIPLY V2, V3, V4, V5");
+    assert (V2 == 0) else $error("V2 = %d", V2);
+    assert (V3 == 500) else $error("V3 = %d", V3);
+
+    $display("Testing overflow multiply");
+    writeRegister(4, 'habcd);
+    writeRegister(5, 'h1000000);
+    runInstruction('h03034520, "MULTIPLY V2, V3, V4, V5");
+    assert (V2 == 'hab) else $error("V2 = 0x%x", V2);
+    assert (V3 == 'hcd000000) else $error("V3 = 0x%x", V3);
+    
+    $display("Testing overflow ignore multiply");
+    writeRegister(4, 'habcd);
+    writeRegister(5, 'h1000000);
+    runInstruction('h03034530, "MULTIPLY V3, V3, V4, V5");
+    assert (V3 == 'hcd000000) else $error("V3 = 0x%x", V3);
 
     #5 $finish;
-end
 
+end
 
 endmodule

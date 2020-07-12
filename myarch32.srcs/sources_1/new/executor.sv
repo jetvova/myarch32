@@ -19,10 +19,13 @@ alu alu (
 
 
 assign writeAddress1 = instruction[19:16];
-assign writeAddress2 = 0;   //instruction[7:4]
+assign writeAddress2 = instruction[7:4];
 assign writeData1 = alu.result[31:0];
-assign writeData2 = 0;  //aluResult[63:32]
+assign writeData2 = alu.result[63:32];
 assign write1 = 1;
-assign write2 = 0;  //If command is multiply
+// The overflow bits are always calculated, but only written
+// if the instruction is a multiply and the output registers
+// aren't the same.
+assign write2 = (instruction[31:24] == 3) && (writeAddress1 != writeAddress2);
 
 endmodule
