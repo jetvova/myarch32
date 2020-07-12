@@ -1,4 +1,3 @@
-
 module top(
     input execEnabled,
     input [3:0] _writeAddress1,
@@ -6,11 +5,12 @@ module top(
     input [31:0] _writeData1,
     input [31:0] _writeData2,
     input _write1,
-    input _write2
-
+    input _write2,
+    input clock,
+    input reset,
+    input [31:0] instruction,
+    output [31:0] result [15:0]
 );
-
-
     
 wire [3:0] writeAddress1;
 wire [3:0] writeAddress2;
@@ -18,11 +18,7 @@ wire [31:0] writeData1;
 wire [31:0] writeData2;
 wire write1;
 wire write2;
-reg clock = 0;
-reg reset = 0;
 wire [31:0] readValues [15:0];
-
-reg [31:0] instruction;
 
 
 registers registers1 (
@@ -47,6 +43,8 @@ executor uut (
     .write1 (write1),
     .write2 (write2)
 );
+
+assign result = readValues;
 
 
 endmodule

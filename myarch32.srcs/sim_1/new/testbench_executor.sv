@@ -45,6 +45,7 @@ wire [31:0] V2 = registers.read[2];
 wire [31:0] V3 = registers.read[3]; 
 wire [31:0] V4 = registers.read[4]; 
 wire [31:0] V5 = registers.read[5]; 
+wire [31:0] IR = registers.read[13]; 
 
 task writeRegister(input [3:0] target, input [31:0] value);
     writeAddress1 = target;
@@ -135,6 +136,22 @@ begin
     writeRegister(3, 'h1234);
     runInstruction('h1203abcd, "BIGMOVE V3, 0xabcd");
     assert (V3 == 'habcd1234) else $error("V3 = 0x%x", V3);
+
+    $display("Testing jump");
+    writeRegister(3, 100);
+    writeRegister(13, 24);
+    runInstruction('h30030000, "JUMP V3");
+    assert (IR == 100) else $error("IR = 0x%x", IR);
+    
+    $display("Testing immediate jump with positive offset");
+    writeRegister(13, 'h24);
+    runInstruction('h31012345, "JUMP +0x12345");
+    assert (IR == 'h24 - 4 + 'h12345 * 4) else $error("IR = 0x%x", IR);
+
+    $display("Testing immediate jump with negative offset");
+    writeRegister(13, 'h1000004);
+    runInstruction('h310edcbb, "JUMP -0x12345");
+    assert (IR == 'h1000004 - 4 - 'h12345 * 4) else $error("IR = 0x%x", IR);
 
     #5 $finish;
 

@@ -53,17 +53,17 @@ Vx = Shift Vy by Vz depending on the specific flags.
 IR = Va
 
 ### `JUMP <IMMEDIATE>`
-IR = IMMEDIATE
+IR = IR + IMMEDIATE - 4
 
 ### `CALL Va`
-RR = IR + 4
+RR = IR
 
 IR = Va
 
 ### `CALL <IMMEDIATE>`
-RR = IR + 4
+RR = IR
 
-IR = IMMEDIATE
+IR = IR + IMMEDIATE - 4
 
 ### `NOP`
 No Operation

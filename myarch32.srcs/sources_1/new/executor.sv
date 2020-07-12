@@ -23,14 +23,22 @@ mover mover (
     .readValues(readValues)
 );
 
+cfu cfu (
+    .args(instruction[19:0]),
+    .operation(instruction[27:24]),
+    .readValues(readValues)
+);
+
 wire[3:0] instructionType = instruction[31:28];
 
-assign writeAddress1 = instruction[19:16];
+assign writeAddress1 = (instructionType == 3)? 13 :
+                       instruction[19:16];
 
 // The value to be written to registers is selected out of many
-// possible options using the group number of the instruction
+// possible options using the group number of the instruction.
 assign writeData1 = (instructionType == 0)? alu.result[31:0] :
                     (instructionType == 1)? mover.result[31:0] : 
+                    (instructionType == 3)? cfu.result[31:0] : 
                     -1;
 assign write1 = 1;
 
