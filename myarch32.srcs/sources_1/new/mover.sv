@@ -7,7 +7,11 @@ module mover(
 
 wire[31:0] simpleResult = readValues[args[15:12]];
 wire[31:0] immediateResult = args[15:0];
-wire[31:0] bigResult = args * 'h10000 | readValues[args[19:16]];
+
+// Overwrites the upper 16 bits with IMMEDIATE, preserving
+// the lower 16 bits of the destination register.
+wire [31:0] originalValue = readValues[args[19:16]];
+wire [31:0] bigResult = { args[15:0], originalValue[15:0] };
 
 assign result = 
     (operation == 4'b0000)? simpleResult :  // MOVE Vx, Vy
