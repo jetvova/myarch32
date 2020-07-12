@@ -46,6 +46,7 @@ wire [31:0] V3 = registers.read[3];
 wire [31:0] V4 = registers.read[4]; 
 wire [31:0] V5 = registers.read[5]; 
 wire [31:0] IR = registers.read[13]; 
+wire [31:0] RR = registers.read[14];
 
 task writeRegister(input [3:0] target, input [31:0] value);
     writeAddress1 = target;
@@ -140,18 +141,46 @@ begin
     $display("Testing jump");
     writeRegister(3, 100);
     writeRegister(13, 24);
+    writeRegister(14, 64);
     runInstruction('h30030000, "JUMP V3");
     assert (IR == 100) else $error("IR = 0x%x", IR);
-    
+    assert (RR == 64) else $error("RR = 0x%x", RR);
+
     $display("Testing immediate jump with positive offset");
     writeRegister(13, 'h24);
+    writeRegister(14, 64);
     runInstruction('h31012345, "JUMP +0x12345");
     assert (IR == 'h24 - 4 + 'h12345 * 4) else $error("IR = 0x%x", IR);
+    assert (RR == 64) else $error("RR = 0x%x", RR);
 
     $display("Testing immediate jump with negative offset");
     writeRegister(13, 'h1000004);
+    writeRegister(14, 64);
     runInstruction('h310edcbb, "JUMP -0x12345");
     assert (IR == 'h1000004 - 4 - 'h12345 * 4) else $error("IR = 0x%x", IR);
+    assert (RR == 64) else $error("RR = 0x%x", RR);
+
+    $display("Testing call");
+    writeRegister(3, 100);
+    writeRegister(13, 24);
+    writeRegister(14, 64);
+    runInstruction('h32030000, "CALL V3");
+    assert (IR == 100) else $error("IR = 0x%x", IR);
+    assert (RR == 24) else $error("RR = 0x%x", RR);
+    
+    $display("Testing immediate call with positive offset");
+    writeRegister(13, 'h24);
+    writeRegister(14, 64);
+    runInstruction('h33012345, "CALL +0x12345");
+    assert (IR == 'h24 - 4 + 'h12345 * 4) else $error("IR = 0x%x", IR);
+    assert (RR == 'h24) else $error("RR = 0x%x", RR);
+
+    $display("Testing immediate call with negative offset");
+    writeRegister(13, 'h1000004);
+    writeRegister(14, 64);
+    runInstruction('h330edcbb, "CALL -0x12345");
+    assert (IR == 'h1000004 - 4 - 'h12345 * 4) else $error("IR = 0x%x", IR);
+    assert (RR == 'h1000004) else $error("RR = 0x%x", RR);
 
     #5 $finish;
 

@@ -38,15 +38,19 @@ assign writeAddress1 = (instructionType == 3)? 13 :
 // possible options using the group number of the instruction.
 assign writeData1 = (instructionType == 0)? alu.result[31:0] :
                     (instructionType == 1)? mover.result[31:0] : 
-                    (instructionType == 3)? cfu.result[31:0] : 
+                    (instructionType == 3)? cfu.newIR[31:0] : 
                     -1;
 assign write1 = 1;
 
-// The overflow bits are always calculated, but only written
-// if the instruction is a multiply and the output registers
-// aren't the same.
-assign writeAddress2 = instruction[7:4];
-assign writeData2 = alu.result[63:32];
-assign write2 = (instruction[31:24] == 3) && (writeAddress1 != writeAddress2);
+assign writeAddress2 = (instructionType == 0)? instruction[7:4] :
+                       (instructionType == 3)? 14 :
+                       -1;
+
+assign writeData2 = (instructionType == 0)? alu.result[63:32] :
+                    (instructionType == 3)? cfu.newRR :
+                    -1;
+
+assign write2 = ((instruction[31:24] == 'h03) && (writeAddress1 != writeAddress2)) ||
+                (instructionType == 3);
 
 endmodule
