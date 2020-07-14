@@ -201,11 +201,11 @@ begin
     runInstruction('h22034000, "WRITE [V3], V4");
     assert (RAM[1022] == 'h12345678) else $error("RAM[1022] = %d", RAM[1022]);
 
-    $display("Testing write");
-    writeRegister(3, 1023);
+    $display("Testing offset write");
+    writeRegister(3, 1000);
     writeRegister(4, 'h12345679);
-    runInstruction('h22034000, "WRITE [V3], V4");
-    assert (RAM[1023] == 'h12345679) else $error("RAM[1023] = %d", RAM[1023]);
+    runInstruction('h2203400f, "WRITE [V3 + 0xf], V4");
+    assert (RAM[1016] == 'h12345679) else $error("RAM[1016] = %d", RAM[1016]);
 
     $display("Testing read");
     writeRegister(3, 100);
@@ -213,10 +213,10 @@ begin
     runInstruction('h21034000, "READ V3, [V4]");
     assert (V3 == 'h12345678) else $error("V3 = %d", V3);
 
-    $display("Testing read");
+    $display("Testing offset read");
     writeRegister(3, 100);
-    writeRegister(4, 1023);
-    runInstruction('h21034000, "READ V3, [V4]");
+    writeRegister(4, 1000);
+    runInstruction('h2103400f, "READ V3, [V4 + 0xf]");
     assert (V3 == 'h12345679) else $error("V3 = %d", V3);
 
     #5 $finish;

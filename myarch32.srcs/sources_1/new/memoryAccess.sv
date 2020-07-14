@@ -18,6 +18,6 @@ wire [3:0] addressRegister = (operation == 4'b0001)? args[15:12] :
                              -1;
 
 assign data = (write == 1) ? readValues[args[15:12]] : 32'bz;
-assign address = readValues[addressRegister]; 
+assign address = readValues[addressRegister] + args[11:0]; 
 
 endmodule
