@@ -50,8 +50,9 @@ assign writeAddress1 = (instructionType == 3)? 13 :
 // The value to be written to registers is selected out of many
 // possible options using the group number of the instruction.
 assign writeData1 = (instructionType == 0)? alu.result[31:0] :
-                    (instructionType == 1)? mover.result[31:0] :
-                    (instructionType == 3)? cfu.newIR[31:0] :
+                    (instructionType == 1)? mover.result :
+                    (instructionType == 2)? memoryAccess.result :
+                    (instructionType == 3)? cfu.newIR :
                     -1;
 // Do not update any register if the instruction is write.
 assign write1 = (instruction[31:24] == 'h22)? 0 :

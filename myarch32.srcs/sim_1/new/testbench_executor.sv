@@ -34,9 +34,9 @@ registerRAM registerRAM (
 
 // Debugging wires for simulation:
 
-// wire [3:0] registers_writeAddress1 = registers.writeAddress1;
-// wire [31:0] registers_writeData1 = registers.writeData1;
-// wire registers_write1 = registers.write1;
+wire [3:0] registers_writeAddress1 = registers.writeAddress1;
+wire [31:0] registers_writeData1 = registers.writeData1;
+wire registers_write1 = registers.write1;
 // wire [31:0] mover_result = uut.mover.result;
 // wire [15:0] mover_args = uut.mover.args;
 // wire [3:0] mover_operation = uut.mover.operation;
@@ -202,10 +202,22 @@ begin
     assert (RAM[1022] == 'h12345678) else $error("RAM[1022] = %d", RAM[1022]);
 
     $display("Testing write");
-    writeRegister(3, 1022);
+    writeRegister(3, 1023);
     writeRegister(4, 'h12345679);
     runInstruction('h22034000, "WRITE [V3], V4");
-    assert (RAM[1022] == 'h12345679) else $error("RAM[1022] = %d", RAM[1022]);
+    assert (RAM[1023] == 'h12345679) else $error("RAM[1023] = %d", RAM[1023]);
+
+    $display("Testing read");
+    writeRegister(3, 100);
+    writeRegister(4, 1022);
+    runInstruction('h21034000, "READ V3, [V4]");
+    assert (V3 == 'h12345678) else $error("V3 = %d", V3);
+
+    $display("Testing read");
+    writeRegister(3, 100);
+    writeRegister(4, 1023);
+    runInstruction('h21034000, "READ V3, [V4]");
+    assert (V3 == 'h12345679) else $error("V3 = %d", V3);
 
     #5 $finish;
 
