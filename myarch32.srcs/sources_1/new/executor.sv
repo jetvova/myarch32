@@ -7,8 +7,11 @@ module executor(
     output [31:0] writeData1,
     output [31:0] writeData2,
     output write1,
-    output write2
+    output write2,
 
+    output ramWrite,
+    output [31:0] ramAddress,
+    inout [31:0] ramData
 );
     
 alu alu (
@@ -29,7 +32,18 @@ cfu cfu (
     .readValues(readValues)
 );
 
+memoryAccess memoryAccess (
+    .args(instruction[19:0]),
+    .readValues(readValues),
+    .operation(instruction[27:24]),
+    .write(ramWrite),
+    .address(ramAdress),
+    .data(ramData)
+);
+
+
 wire[3:0] instructionType = instruction[31:28];
+assign memoryAccess.enabled = instructionType == 2;
 
 assign writeAddress1 = (instructionType == 3)? 13 :
                        instruction[19:16];
@@ -37,10 +51,12 @@ assign writeAddress1 = (instructionType == 3)? 13 :
 // The value to be written to registers is selected out of many
 // possible options using the group number of the instruction.
 assign writeData1 = (instructionType == 0)? alu.result[31:0] :
-                    (instructionType == 1)? mover.result[31:0] : 
-                    (instructionType == 3)? cfu.newIR[31:0] : 
+                    (instructionType == 1)? mover.result[31:0] :
+                    (instructionType == 3)? cfu.newIR[31:0] :
                     -1;
-assign write1 = 1;
+// Do not update any register if the instruction is write.
+assign write1 = (instruction[31:24] == 'h22)? 0 :
+                1;
 
 assign writeAddress2 = (instructionType == 0)? instruction[7:4] :
                        (instructionType == 3)? 14 :

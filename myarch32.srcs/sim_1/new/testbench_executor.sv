@@ -1,4 +1,4 @@
-`timescale 10ns / 1ps
+`timescale 1ns / 1ps
 module testbench_executor;
     
 reg clock = 0;
@@ -25,6 +25,13 @@ registers registers (
     .reset (reset)
 );
 
+registerRAM registerRAM (
+    .clock (clock),
+    .write (uut.ramWrite),
+    .address (uut.ramAddress),
+    .data (uut.ramData)
+);
+
 // Debugging wires for simulation:
 
 // wire [3:0] registers_writeAddress1 = registers.writeAddress1;
@@ -33,10 +40,14 @@ registers registers (
 // wire [31:0] mover_result = uut.mover.result;
 // wire [15:0] mover_args = uut.mover.args;
 // wire [3:0] mover_operation = uut.mover.operation;
+wire ramWrite = uut.memoryAccess.write;
+wire [31:0] ramAddress = uut.memoryAccess.address;
+wire memoryAccessEnabled = uut.memoryAccess.enabled;
+wire [31:0] registerRamData = registerRAM.data;
 
 executor uut (
     .instruction (instruction),
-    .readValues (registers.read)
+    .readValues (registers.read),
 );
 
 always #1 clock = ~clock;
@@ -47,6 +58,7 @@ wire [31:0] V4 = registers.read[4];
 wire [31:0] V5 = registers.read[5]; 
 wire [31:0] IR = registers.read[13]; 
 wire [31:0] RR = registers.read[14];
+wire [31:0] RAM [1023:0] = registerRAM.ram;
 
 task writeRegister(input [3:0] target, input [31:0] value);
     writeAddress1 = target;
@@ -84,6 +96,7 @@ begin
     #2 
     reset = 0;
     #2
+    registerRAM.ram[1022] <= 0;
 
     $display("Testing add");
     writeRegister(4, 100);
@@ -181,6 +194,18 @@ begin
     runInstruction('h330edcbb, "CALL -0x12345");
     assert (IR == 'h1000004 - 4 - 'h12345 * 4) else $error("IR = 0x%x", IR);
     assert (RR == 'h1000004) else $error("RR = 0x%x", RR);
+
+    $display("Testing write");
+    writeRegister(3, 1022);
+    writeRegister(4, 'h12345678);
+    runInstruction('h22034000, "WRITE [V3], V4");
+    assert (RAM[1022] == 'h12345678) else $error("RAM[1022] = %d", RAM[1022]);
+
+    $display("Testing write");
+    writeRegister(3, 1022);
+    writeRegister(4, 'h12345679);
+    runInstruction('h22034000, "WRITE [V3], V4");
+    assert (RAM[1022] == 'h12345679) else $error("RAM[1022] = %d", RAM[1022]);
 
     #5 $finish;
 
