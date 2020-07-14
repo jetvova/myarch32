@@ -47,7 +47,7 @@ wire [31:0] registerRamData = registerRAM.data;
 
 executor uut (
     .instruction (instruction),
-    .readValues (registers.read),
+    .readValues (registers.read)
 );
 
 always #1 clock = ~clock;

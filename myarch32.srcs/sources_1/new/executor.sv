@@ -37,10 +37,9 @@ memoryAccess memoryAccess (
     .readValues(readValues),
     .operation(instruction[27:24]),
     .write(ramWrite),
-    .address(ramAdress),
+    .address(ramAddress),
     .data(ramData)
 );
-
 
 wire[3:0] instructionType = instruction[31:28];
 assign memoryAccess.enabled = instructionType == 2;
