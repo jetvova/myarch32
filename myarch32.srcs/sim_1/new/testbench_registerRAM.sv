@@ -13,11 +13,11 @@ registerRAM uut (
     .data(dataTransfer)
 );
 
-always #1 clock = ~clock;
-
-
 wire [31:0] dataTransfer;
+wire [31:0] RAM [1023:0] = uut.ram; 
+
 assign dataTransfer = (write == 1)? data : 32'bz;
+always #1 clock = ~clock;
 always @(posedge clock) 
 begin
      if (write == 0) 
@@ -25,10 +25,6 @@ begin
          data <= dataTransfer;
      end
 end
-
-
-wire [31:0] RAM [1023:0] = uut.ram; 
-
 
 initial 
 begin 
@@ -50,13 +46,7 @@ address = 1015;
 #2
 assert (data == 'h12345675) else $error("data = 0x%x", data);
 
-
-
 #5 $finish;
-
-
-
-
 end
 
 endmodule

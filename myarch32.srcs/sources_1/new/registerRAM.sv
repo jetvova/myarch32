@@ -8,13 +8,13 @@ module registerRAM(
 
 reg [31:0] ram [1023:0];
 
-assign data = (write == 0)? ram[address] : 32'bz;
+assign data = (write == 0)? ram[address[31:2]] : 32'bz;
 
 always @(negedge clock) 
 begin
     if (write == 1) 
     begin
-        ram[address] <= data;
+        ram[address[31:3]] <= data;
     end
 end
 
