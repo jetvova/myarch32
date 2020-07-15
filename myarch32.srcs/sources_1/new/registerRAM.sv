@@ -14,7 +14,7 @@ always @(negedge clock)
 begin
     if (write == 1) 
     begin
-        ram[address[31:3]] <= data;
+        ram[address[31:2]] <= data;
     end
 end
 

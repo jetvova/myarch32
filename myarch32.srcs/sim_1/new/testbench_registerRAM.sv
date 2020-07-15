@@ -14,7 +14,7 @@ registerRAM uut (
 );
 
 wire [31:0] dataTransfer;
-wire [31:0] RAM [1023:0] = uut.ram; 
+wire [31:0] RAM [265:0] = uut.ram; 
 
 assign dataTransfer = (write == 1)? data : 32'bz;
 always #1 clock = ~clock;
@@ -30,19 +30,19 @@ initial
 begin 
 
 #1
-for (int i=1010; i<1020; i++) begin
+for (int i=0; i<10; i++) begin
     $display("Testing write");
     write = 1;
-    address = i;
-    data = 'h12345670 + (i%10);
+    address = 1008 + i*4;
+    data = 'h12345670 + i;
     #2
-    assert (RAM[i] == 'h12345670 + (i%10)) else $error("RAM[%d] = 0x%x", i, RAM[i]);
+    assert (RAM[(1008 + i*4)/4] == 'h12345670 + i) else $error("RAM[%d] = 0x%x", (1008 + i*4)/4, RAM[(1008 + i*4)/4]);
 end
 
 #1
 $display("Testing read");
 write = 0;
-address = 1015;
+address = 1028;
 #2
 assert (data == 'h12345675) else $error("data = 0x%x", data);
 

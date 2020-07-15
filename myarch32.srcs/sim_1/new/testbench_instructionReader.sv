@@ -40,8 +40,6 @@ wire readerRamWrite = uut.ramWrite;
 wire [31:0] readerRamData = uut.ramData; 
 wire [31:0] readerRamAddress = uut.ramAddress;
 
-
-
 always #1 clock = ~clock;
 
 task writeRam(input [31:0] address, input [31:0] value);
@@ -58,11 +56,11 @@ begin
     #2 
     reset = 0;
     #2
-    registers.v[13] <= 1010;
+    registers.v[13] <= 1008;
 
     $display("Filling RAM");
     for (int i=0; i<10; i++) begin
-        writeRam(1010 + i*4, 'h12345670 + i);
+        writeRam(1008 + i*4, 'h12345670 + i);
     end
 
     for (int i=0; i<10; i++) begin
@@ -71,18 +69,9 @@ begin
         iruEnabled = 0;
         #0.1;
         assert (OR == 'h12345670 + i) else $error("OR = 0x%x", OR);
-        assert (IR == 1014 + i*4) else $error("IR = %d", IR);
+        assert (IR == 1012 + i*4) else $error("IR = %d", IR);
         #1.9;
     end
-
-    // #1
-    // $display("Testing instructionReader");
-    // write = 0;
-    // address = 1015;
-    // #2
-    // assert (data == 'h12345675) else $error("data = 0x%x", data);
-
-
 
     #5 $finish;
 end
