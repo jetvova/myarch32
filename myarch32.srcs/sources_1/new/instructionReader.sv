@@ -19,8 +19,8 @@ assign ramWrite = (enabled == 1) ? 0 : 1'bz;
 assign ramAddress = (enabled == 1) ? IR : 32'bz;
 assign ramData = 32'bz;
 
-assign writeAddress1 = (enabled == 1) ? 13 : 1'bz;
-assign writeData1 = (enabled == 1) ? IR + 4 : 1'bz;
+assign writeAddress1 = (enabled == 1) ? 13 : 4'bz;
+assign writeData1 = (enabled == 1) ? IR + 4 : 32'bz;
 assign write1 = (enabled == 1) ? 1 : 1'bz;
 
 

@@ -10,14 +10,19 @@ module memoryAccess (
     inout [31:0] data
 );
 
-assign write = enabled && (operation == 4'b0010);
+assign write = (enabled == 0) ? 'bz : (operation == 4'b0010);
+
 assign result = data;
 
 wire [3:0] addressRegister = (operation == 4'b0001)? args[15:12] :
                              (operation == 4'b0010)? args[19:16] :
                              -1;
 
-assign data = (write == 1) ? readValues[args[15:12]] : 32'bz;
-assign address = readValues[addressRegister] + args[11:0]; 
+assign data = (enabled == 0) ? 32'bz :
+                (write == 1) ? readValues[args[15:12]] : 
+                32'bz;
+
+assign address = (enabled == 0) ? 32'bz :
+                 readValues[addressRegister] + args[11:0]; 
 
 endmodule

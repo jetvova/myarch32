@@ -1,4 +1,5 @@
 module executor(
+    input enabled,
     input [31:0] instruction,
     input [31:0] readValues [15:0],
     
@@ -42,31 +43,34 @@ memoryAccess memoryAccess (
 );
 
 wire[3:0] instructionType = instruction[31:28];
-assign memoryAccess.enabled = instructionType == 2;
+assign memoryAccess.enabled = enabled && instructionType == 2;
 
-assign writeAddress1 = (instructionType == 3)? 13 :
-                       instruction[19:16];
+assign writeAddress1 = (enabled == 1 && instructionType == 3)? 13 :
+                       (enabled == 1 && instructionType != 3)? instruction[19:16] :
+                       4'bz;
 
 // The value to be written to registers is selected out of many
 // possible options using the group number of the instruction.
-assign writeData1 = (instructionType == 0)? alu.result[31:0] :
-                    (instructionType == 1)? mover.result :
-                    (instructionType == 2)? memoryAccess.result :
-                    (instructionType == 3)? cfu.newIR :
-                    -1;
+assign writeData1 = (enabled == 1 && instructionType == 0)? alu.result[31:0] :
+                    (enabled == 1 && instructionType == 1)? mover.result :
+                    (enabled == 1 && instructionType == 2)? memoryAccess.result :
+                    (enabled == 1 && instructionType == 3)? cfu.newIR :
+                    32'bz;
 // Do not update any register if the instruction is write.
-assign write1 = (instruction[31:24] == 'h22)? 0 :
-                1;
+assign write1 = (enabled == 1 && instruction[31:24] == 'h22)? 0 :
+                (enabled == 1 && instruction[31:24] != 'h22)? 1 :
+                1'bz;
 
-assign writeAddress2 = (instructionType == 0)? instruction[7:4] :
-                       (instructionType == 3)? 14 :
-                       -1;
+assign writeAddress2 = (enabled == 1 && instructionType == 0)? instruction[7:4] :
+                       (enabled == 1 && instructionType == 3)? 14 :
+                       4'bz;
 
-assign writeData2 = (instructionType == 0)? alu.result[63:32] :
-                    (instructionType == 3)? cfu.newRR :
-                    -1;
+assign writeData2 = (enabled == 1 && instructionType == 0)? alu.result[63:32] :
+                    (enabled == 1 && instructionType == 3)? cfu.newRR :
+                    32'bz;
 
-assign write2 = ((instruction[31:24] == 'h03) && (writeAddress1 != writeAddress2)) ||
-                (instructionType == 3);
+assign write2 = ((instruction[31:24] == 'h03) && (writeAddress1 != writeAddress2))? 1 : 
+                (instructionType == 3)? 1 :
+                1'bz;
 
 endmodule

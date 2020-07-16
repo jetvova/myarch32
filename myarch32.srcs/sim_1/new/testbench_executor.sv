@@ -46,6 +46,7 @@ wire memoryAccessEnabled = uut.memoryAccess.enabled;
 wire [31:0] registerRamData = registerRAM.data;
 
 executor uut (
+    .enabled(1),
     .instruction (instruction),
     .readValues (registers.read)
 );
@@ -84,7 +85,6 @@ task runInstruction(input [31:0] code, input string text);
     execEnabled = 1; 
     #2
     execEnabled = 0;
-
 endtask
 
 initial 
