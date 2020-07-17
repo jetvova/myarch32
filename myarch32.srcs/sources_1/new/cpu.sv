@@ -23,14 +23,12 @@ executor executor (
     .enabled(executorEnabled),
     .instruction(instructionReader.OR),
     .readValues(registers.read)
-    //.ramData(data)
 );
 
 instructionReader instructionReader (
     .enabled(readerEnabled),
     .clock(clock),
     .IR(registers.read[13])
-    //.ramData(data)
 );
 
 registers registers (
@@ -51,14 +49,16 @@ assign registers.write1 = instructionReader.write1;
 assign registers.writeData2 = executor.writeData2; 
 assign registers.writeAddress2 = executor.writeAddress2; 
 assign registers.write2 = executor.write2; 
-assign ramWrite = instructionReader.ramWrite;
-assign ramAddress = instructionReader.ramAddress;
 
-assign executor.ramData = ramData; 
+assign ramWrite = instructionReader.ramWrite;
+assign ramWrite = executor.ramWrite;
+assign ramAddress = instructionReader.ramAddress;
+assign ramAddress = executor.ramAddress;
+
 assign instructionReader.ramData = ramData; 
-// TODO: Figure out why this doen't work instead:
-// assign ramData = executor.ramData; 
-// assign ramData = instructionReader.ramData; 
+
+assign ramData = (executorEnabled && executor.ramWrite == 1) ? executor.ramData : 32'bz;
+assign executor.ramData = (executorEnabled && executor.ramWrite == 0) ? ramData : 32'bz; 
 
 always @(negedge clock) 
 begin
