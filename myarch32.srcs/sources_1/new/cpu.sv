@@ -22,7 +22,8 @@ assign readerEnabled = (currentState == READING_INSTRUCTION);
 executor executor (
     .enabled(executorEnabled),
     .instruction(instructionReader.OR),
-    .readValues(registers.read)
+    .readValues(registers.read),
+    .flags(registers.flags)
 );
 
 instructionReader instructionReader (
@@ -35,6 +36,8 @@ registers registers (
     .writeAddress2(executor.writeAddress2),
     .writeData2(executor.writeData2),
     .write2(executor.write2),
+    .newFlags(executor.newFlags),
+    .writeFlags(executor.writeFlags),
     .clock(clock),
     .reset(reset)
 );

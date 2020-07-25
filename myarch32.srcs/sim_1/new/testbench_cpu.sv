@@ -18,9 +18,9 @@ cpu uut(
 );
 
 // Wires for debugging:
-// wire [31:0] registers [15:0] = uut.registers.read;
+wire [31:0] registers [15:0] = uut.registers.read;
 // wire currentState = uut.currentState;
-// wire [31:0] RAM [100:0] = registerRAM.ram; 
+wire [31:0] RAM [100:0] = registerRAM.ram; 
 
 // wire [31:0] RAM_Data = registerRAM.data;
 // wire RAM_Write = registerRAM.write;
@@ -44,6 +44,13 @@ wire [31:0] IR_OR = uut.instructionReader.OR;
 // wire IR_enabled = uut.instructionReader.enabled;
 // wire EX_enabled = uut.executor.enabled;
 
+wire DE_enabled = uut.executor.conditionEvaluator.instructionEnabled; 
+wire [15:0] ALU_arg1 = uut.executor.alu.arg1; 
+wire [3:0] REG_flags = uut.registers.flags;
+wire [3:0] EX_newFlags = uut.executor.newFlags;
+wire [3:0] ALU_flags = uut.executor.alu.flags;
+
+wire EX_flagsWrite = uut.executor.writeFlags;
 
 always #1 clock = ~clock;
 
@@ -58,20 +65,26 @@ begin
 
     // This program fills the RAM with a Fibonacci sequence
     writeInstruction(0, 'h11000004, "MOVE V0, 4");
-    writeInstruction(4, 'h11010034, "MOVE V1, 52");
+    writeInstruction(4, 'h1101003c, "MOVE V1, 64");
 
     writeInstruction(8, 'h110b0000, "MOVE V11, 0");
     writeInstruction(12, 'h110c0001, "MOVE V12, 1");
     writeInstruction(16, 'h2201b000, "WRITE [V1], V11");
     writeInstruction(20, 'h2201c004, "WRITE [V1+4], V12");
 
-    writeInstruction(24, 'h21021000, "READ V2, [V1]");
+    writeInstruction(24, 'h21021000, "READ V2, [V1]"); // <= Jump target
     writeInstruction(28, 'h21031004, "READ V3, [V1 + 4]");
     writeInstruction(32, 'h01043200, "ADD V4, V3, V2");
     writeInstruction(36, 'h22014008, "WRITE [V1+8], V4");
 
-    writeInstruction(40, 'h01011000, "ADD V1, V1, V0");
-    writeInstruction(44, 'h310ffffb, "JUMP -5");
+    writeInstruction(40, 'h01011000, "ADD V1, V1, V0");    
+    writeInstruction(44, 'h060100b0, "COMPARE V1, 176");
+
+    writeInstruction(48, 'h319ffffa, "JUMP(u<) -6");
+
+    writeInstruction(52, 'h31000000, "JUMP 0");
+
+    registerRAM.ram[46] = 'hffffffff;
     
     $display("Resetting");
     #1
@@ -79,21 +92,21 @@ begin
     #3.1 
     reset = 0;
     #1.9
-    registerRAM.ram[1022] <= 0;
 
-    #1000
+    #950
 
-    assert (RAM[13] == 0);
-    assert (RAM[14] == 1);
-    assert (RAM[15] == 1);
-    assert (RAM[16] == 2);
-    assert (RAM[17] == 3);
-    assert (RAM[18] == 5);
-    assert (RAM[19] == 8);
-    assert (RAM[20] == 13);
-    assert (RAM[21] == 21);
+    assert (RAM[15] == 0);
+    assert (RAM[16] == 1);
+    assert (RAM[17] == 1);
+    assert (RAM[18] == 2);
+    assert (RAM[19] == 3);
+    assert (RAM[20] == 5);
+    assert (RAM[21] == 8);
+    assert (RAM[22] == 13);
+    assert (RAM[23] == 21);
     // ...
-    assert (RAM[54] == 165580141);
+    assert (RAM[45] == 832040);
+    assert (RAM[46] == 'hffffffff);
 
     $finish;
 

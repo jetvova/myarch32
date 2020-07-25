@@ -44,6 +44,9 @@ wire ramWrite = uut.memoryAccess.write;
 wire [31:0] ramAddress = uut.memoryAccess.address;
 wire memoryAccessEnabled = uut.memoryAccess.enabled;
 wire [31:0] registerRamData = registerRAM.data;
+wire [63:0] aluResult = uut.alu.result;
+wire [31:0] operation = uut.alu.operation;
+
 
 executor uut (
     .enabled(1),
@@ -59,6 +62,7 @@ wire [31:0] V4 = registers.read[4];
 wire [31:0] V5 = registers.read[5]; 
 wire [31:0] IR = registers.read[13]; 
 wire [31:0] RR = registers.read[14];
+wire [3:0] flags = uut.alu.flags;
 wire [31:0] RAM [1023:0] = registerRAM.ram;
 
 task writeRegister(input [3:0] target, input [31:0] value);
@@ -129,6 +133,33 @@ begin
     writeRegister(5, 'h1000000);
     runInstruction('h03034530, "MULTIPLY V3, V3, V4, V5");
     assert (V3 == 'hcd000000) else $error("V3 = 0x%x", V3);
+
+    $display("Testing register compare flags");
+    writeRegister(3, 'h00000001);
+    writeRegister(4, 'h00000000);
+    runInstruction('h05034000, "COMPARE V3, V4");
+    assert (flags == 'b0000) else $error("flags = 0x%x", flags);
+
+    $display("Testing register compare flags");
+    writeRegister(3, 'h00000001);
+    writeRegister(4, 'h00000001);
+    runInstruction('h05034000, "COMPARE V3, V4");
+    assert (flags == 'b1000) else $error("flags = 0x%x", flags);
+
+    $display("Testing immediate compare flags");
+    writeRegister(3, 'h00000001);
+    runInstruction('h06030002, "COMPARE V3, 0x2");
+    assert (flags == 'b0110) else $error("flags = 0x%x", flags);
+
+    $display("Testing immediate compare flags");
+    writeRegister(3, 'h8000fffe);
+    runInstruction('h0603ffff, "COMPARE V3, 0xffff");
+    assert (flags == 'b0011) else $error("flags = 0x%x", flags);
+
+    $display("Testing immediate compare flags");
+    writeRegister(3, -1);
+    runInstruction('h06030002, "COMPARE V3, 0x2");
+    assert (flags == 'b0010) else $error("flags = 0x%x", flags);
 
     $display("Testing move");
     writeRegister(3, 2);
