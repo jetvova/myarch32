@@ -65,7 +65,7 @@ begin
 
     // This program fills the RAM with a Fibonacci sequence
     writeInstruction(0, 'h11000004, "MOVE V0, 4");
-    writeInstruction(4, 'h1101003c, "MOVE V1, 64");
+    writeInstruction(4, 'h1101003c, "MOVE V1, 60");
 
     writeInstruction(8, 'h110b0000, "MOVE V11, 0");
     writeInstruction(12, 'h110c0001, "MOVE V12, 1");
